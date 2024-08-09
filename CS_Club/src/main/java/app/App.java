@@ -1,7 +1,7 @@
 
-package com.mycompany.cs_club;
+package app;
 
-public class CS_Club {
+public class App {
 
     public static void main(String[] args) {
         
