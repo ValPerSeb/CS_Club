@@ -1,13 +1,15 @@
 
-package app.model;
+package app.dto;
 
-public class Guest {
+import app.model.GuestStatus;
+
+public class GuestDto {
     private long id;
-    private User userId;
-    private Partner partnerId;
+    private UserDto userId;
+    private PartnerDto partnerId;
     private GuestStatus status;
 
-    public Guest() {
+    public GuestDto() {
     }
 
     public long getId() {
@@ -18,19 +20,19 @@ public class Guest {
         this.id = id;
     }
 
-    public User getUserId() {
+    public UserDto getUserId() {
         return userId;
     }
 
-    public void setUserId(User userId) {
+    public void setUserId(UserDto userId) {
         this.userId = userId;
     }
 
-    public Partner getPartnerId() {
+    public PartnerDto getPartnerId() {
         return partnerId;
     }
 
-    public void setPartnerId(Partner partnerId) {
+    public void setPartnerId(PartnerDto partnerId) {
         this.partnerId = partnerId;
     }
 
@@ -42,3 +44,5 @@ public class Guest {
         this.status = status;
     }
 }
+
+

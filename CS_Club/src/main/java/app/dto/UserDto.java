@@ -1,14 +1,16 @@
 
-package app.model;
+package app.dto;
 
-public class User {
-   private long id;
-   private Person personId;
-   private String userName;
-   private String password;
-   private Role role;
+import app.model.Role;
 
-    public User() {
+public class UserDto {
+    private long id;
+    private PersonDto personId;
+    private String userName;
+    private String password;
+    private Role role;
+
+    public UserDto() {
     }
 
     public long getId() {
@@ -19,12 +21,12 @@ public class User {
         this.id = id;
     }
 
-    public Person getPerson() {
+    public PersonDto getPersonId() {
         return personId;
     }
 
-    public void setPerson(Person person) {
-        this.personId = person;
+    public void setPersonId(PersonDto personId) {
+        this.personId = personId;
     }
 
     public String getUserName() {

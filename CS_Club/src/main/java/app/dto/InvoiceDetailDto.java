@@ -1,14 +1,14 @@
 
-package app.model;
+package app.dto;
 
-public class InvoiceDetail {
+public class InvoiceDetailDto {
     private long id;
-    private Invoice invoiceId;
+    private InvoiceDto invoiceId;
     private int item;
     private String description;
     private double amount;
 
-    public InvoiceDetail() {
+    public InvoiceDetailDto() {
     }
 
     public long getId() {
@@ -19,11 +19,11 @@ public class InvoiceDetail {
         this.id = id;
     }
 
-    public Invoice getInvoiceId() {
+    public InvoiceDto getInvoiceId() {
         return invoiceId;
     }
 
-    public void setInvoiceId(Invoice invoiceId) {
+    public void setInvoiceId(InvoiceDto invoiceId) {
         this.invoiceId = invoiceId;
     }
 

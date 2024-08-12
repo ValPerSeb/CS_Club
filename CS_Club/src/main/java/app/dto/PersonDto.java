@@ -1,13 +1,13 @@
 
-package app.model;
+package app.dto;
 
-public class Person {
+public class PersonDto {
     private long id;
     private long document;
     private String name;
     private long cellPhone;
 
-    public Person() {
+    public PersonDto() {
     }
 
     public long getId() {

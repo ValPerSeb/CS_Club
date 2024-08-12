@@ -1,16 +1,17 @@
 
-package app.model;
+package app.dto;
 
+import app.model.SubscriptionType;
 import java.sql.Date;
 
-public class Partner {
+public class PartnerDto {
     private long id;
-    private User userId;
+    private UserDto userId;
     private double amount;
     private SubscriptionType type;
     private Date creationDate;
 
-    public Partner() {
+    public PartnerDto() {
     }
 
     public long getId() {
@@ -21,11 +22,11 @@ public class Partner {
         this.id = id;
     }
 
-    public User getUserId() {
+    public UserDto getUserId() {
         return userId;
     }
 
-    public void setUserId(User userId) {
+    public void setUserId(UserDto userId) {
         this.userId = userId;
     }
 
