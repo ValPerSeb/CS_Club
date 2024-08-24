@@ -19,11 +19,11 @@ public class User {
         this.id = id;
     }
 
-    public Person getPerson() {
+    public Person getPersonId() {
         return personId;
     }
 
-    public void setPerson(Person person) {
+    public void setPersonId(Person person) {
         this.personId = person;
     }
 

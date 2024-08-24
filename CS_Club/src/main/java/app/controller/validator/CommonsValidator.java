@@ -3,7 +3,7 @@ package app.controller.validator;
 
 import java.sql.Date;
 
-public abstract class CommonsValidator {
+public class CommonsValidator {
     public String isValidString(String element, String value) throws Exception {
         if (value.equals("")) {
             throw new Exception(element + " no puede ser un valor vacío.");
