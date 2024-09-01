@@ -3,5 +3,6 @@ package app.model;
 
 public enum SubscriptionType {
     REGULAR,
-    VIP
+    VIP,
+    PENDING_VIP
 }

@@ -2,14 +2,14 @@
 package app.dto;
 
 import app.model.SubscriptionType;
-import java.sql.Date;
+import java.sql.Timestamp;
 
 public class PartnerDto {
     private long id;
     private UserDto userId;
     private double amount;
     private SubscriptionType type;
-    private Date creationDate;
+    private Timestamp creationDate;
 
     public PartnerDto() {
     }
@@ -46,11 +46,22 @@ public class PartnerDto {
         this.type = type;
     }
 
-    public Date getCreationDate() {
+    public Timestamp getCreationDate() {
         return creationDate;
     }
 
-    public void setCreationDate(Date creationDate) {
+    public void setCreationDate(Timestamp creationDate) {
         this.creationDate = creationDate;
+    }
+    
+    @Override
+    public String toString() {
+        return "----------------------------------------------- \n"
+                + "* ID Socio: " + id + "\n"
+                + "* ID Usuario: " + userId.getId() + "\n"
+                + "* Fecha de afiliación: " + creationDate.toString() + "\n"
+                + "* Fondos Disponibles: " + amount + "\n"
+                + "* Tipo de suscripción: " + type.toString() + "\n"
+                + "----------------------------------------------- \n";
     }
 }

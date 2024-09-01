@@ -2,13 +2,13 @@
 package app.dto;
 
 import app.model.InvoiceStatus;
-import java.sql.Date;
+import java.sql.Timestamp;
 
 public class InvoiceDto {
     private long id;
     private PersonDto personId;
     private PartnerDto partnerId;
-    private Date creationDate;
+    private Timestamp creationDate;
     private double amount;
     private InvoiceStatus invoiceStatus;
 
@@ -39,11 +39,11 @@ public class InvoiceDto {
         this.partnerId = partnerId;
     }
 
-    public Date getCreationDate() {
+    public Timestamp getCreationDate() {
         return creationDate;
     }
 
-    public void setCreationDate(Date creationDate) {
+    public void setCreationDate(Timestamp creationDate) {
         this.creationDate = creationDate;
     }
 
@@ -61,5 +61,17 @@ public class InvoiceDto {
 
     public void setInvoiceStatus(InvoiceStatus invoiceStatus) {
         this.invoiceStatus = invoiceStatus;
+    }
+
+    @Override
+    public String toString() {
+        return "----------------------------------------------- \n"
+                + "* ID: " + id + "\n"
+                + "* ID Consumidor: " + personId.getId() + "\n"
+                + "* ID Socio: " + partnerId.getId() + "\n"
+                + "* Fecha de generación: " + creationDate.toString() + "\n"
+                + "* Valor total: " + amount + "\n"
+                + "* Estado: " + invoiceStatus.toString() + "\n"
+                + "----------------------------------------------- \n";
     }
 }

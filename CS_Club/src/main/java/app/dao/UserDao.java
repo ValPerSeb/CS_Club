@@ -55,4 +55,13 @@ public class UserDao {
         preparedStatement.execute();
         preparedStatement.close();
     }
+    
+    public void deleteUser(UserDto userDto) throws Exception {
+        User user = Helper.parse(userDto);
+        String query = "DELETE FROM USER WHERE ID = ?";
+        PreparedStatement preparedStatement = DBConnection.getConnection().prepareStatement(query);
+        preparedStatement.setLong(1,user.getId());
+        preparedStatement.execute();
+        preparedStatement.close();	
+    }
 }

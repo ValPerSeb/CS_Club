@@ -3,17 +3,17 @@ package app.controller;
 
 import app.dto.UserDto;
 import app.model.Role;
-import app.service.UserService;
+import app.service.Service;
 import java.util.HashMap;
 import java.util.Map;
 
 public class LoginController implements ControllerInterface{
-    private UserService userService;
+    private Service service;
     private static final String MENU= "*** CS Club *** \n Ingrese la opción deseada: \n 1. Iniciar Sesión. \n 2. Salir. \n";
     private Map<Role,ControllerInterface> roles;
 
     public LoginController() {
-        this.userService = new UserService();
+        this.service = new Service();
         ControllerInterface adminController = new AdminController();
         ControllerInterface partnerController = new PartnerController();
         ControllerInterface guestController = new GuestController();
@@ -61,18 +61,22 @@ public class LoginController implements ControllerInterface{
 	
     private void login()throws Exception {
         System.out.println("Ingrese el Usuario");
-        String userName= Utils.getReader().nextLine();
-        Utils.getValidator().isValidString("Usuario", userName);
+        String inputUserName= Utils.getReader().nextLine();
+        String userName = Utils.getValidator().isValidString("Usuario", inputUserName);
+        
         System.out.println("Ingrese la Contraseña");
-        String password= Utils.getReader().nextLine();
-        Utils.getValidator().isValidString("Contraseña" ,password);
+        String inputPassword= Utils.getReader().nextLine();
+        String password = Utils.getValidator().isValidString("Contraseña" ,inputPassword);
+        
         UserDto userDto = new UserDto();
         userDto.setPassword(password);
         userDto.setUserName(userName);
-        this.userService.login(userDto);
+        
+        this.service.login(userDto);
         if(roles.get(userDto.getRole())==null) {
             throw new Exception ("Rol invalido");
         }
+        
         roles.get(userDto.getRole()).session();
     }
 }

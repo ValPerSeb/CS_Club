@@ -1,14 +1,14 @@
 
 package app.model;
 
-import java.sql.Date;
+import java.sql.Timestamp;
 
 public class Partner {
     private long id;
     private User userId;
     private double amount;
     private SubscriptionType type;
-    private Date creationDate;
+    private Timestamp creationDate;
 
     public Partner() {
     }
@@ -45,11 +45,11 @@ public class Partner {
         this.type = type;
     }
 
-    public Date getCreationDate() {
+    public Timestamp getCreationDate() {
         return creationDate;
     }
 
-    public void setCreationDate(Date creationDate) {
+    public void setCreationDate(Timestamp creationDate) {
         this.creationDate = creationDate;
     }
 }

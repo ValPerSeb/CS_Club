@@ -1,13 +1,13 @@
 
 package app.model;
 
-import java.sql.Date;
+import java.sql.Timestamp;
 
 public class Invoice {
     private long id;
     private Person personId;
     private Partner partnerId;
-    private Date creationDate;
+    private Timestamp creationDate;
     private double amount;
     private InvoiceStatus invoiceStatus;
 
@@ -38,11 +38,11 @@ public class Invoice {
         this.partnerId = partnerId;
     }
 
-    public Date getCreationDate() {
+    public Timestamp getCreationDate() {
         return creationDate;
     }
 
-    public void setCreationDate(Date creationDate) {
+    public void setCreationDate(Timestamp creationDate) {
         this.creationDate = creationDate;
     }
 
