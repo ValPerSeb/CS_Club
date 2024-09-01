@@ -9,7 +9,9 @@ import app.model.Role;
 import app.model.SubscriptionType;
 import app.service.Service;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Comparator;
 import java.util.List;
 
 public class AdminController implements ControllerInterface{
@@ -69,7 +71,7 @@ public class AdminController implements ControllerInterface{
                     return true;
             }
             case "5": {
-                    System.out.println("***Promoción a VIP***\n");
+                    System.out.println("***Promoción a VIP de socios***\n");
                     this.upgradePartner();
                     return true;
             }
@@ -153,35 +155,38 @@ public class AdminController implements ControllerInterface{
     }
     
     private void upgradePartner() throws Exception{
-        List<PartnerDto> partnersDto = this.service.getPartnersByType(SubscriptionType.PENDING_VIP);
-        if(partnersDto.size() < 1){
-            System.out.println("No hay solicitudes pendientes.");
-            return;
+        List<PartnerDto> partnersDtoPending = this.service.getPartnersByType(SubscriptionType.PENDING_VIP);
+        List<PartnerDto> partnersDtoVIP = this.service.getPartnersByType(SubscriptionType.VIP);
+        
+        int maxVIP = 5;
+        int VIPCurrent = partnersDtoVIP.size();
+        int pending = partnersDtoPending.size();
+        int available = maxVIP - VIPCurrent;
+        
+        if(pending < 1){
+            throw new Exception("No hay solicitudes pendientes.");
         }
+        if(available <= 0){
+            throw new Exception("Se ha superado el límite máximo de clientes VIP");
+        }
+        
         System.out.println("Solicitudes pendientes: ");
-        for(PartnerDto partnerDto : partnersDto){
+        for(PartnerDto partnerDto : partnersDtoPending){
             System.out.println(partnerDto.toString());
         }
         
-        System.out.println("Ingrese el ID Socio de la solicitud a aceptar: ");
-        String inputIDSocio = Utils.getReader().nextLine();
-        Long IDSocio = Utils.getValidator().isValidLong("ID", inputIDSocio);
+        partnersDtoPending.sort(Comparator.comparingDouble(PartnerDto::calcPaidInvoicesTotal).reversed()
+            .thenComparingDouble(PartnerDto::getAmount).reversed()
+            .thenComparing(PartnerDto::getCreationDate));
         
-        PartnerDto selectedPartner = null;
-        for (PartnerDto partner : partnersDto) {
-            if (partner.getId() == IDSocio) {
-                selectedPartner = partner;
-                break;
-            }
+        for (int i=0; i<available && i<pending; i++){
+            PartnerDto selectedPartner = partnersDtoPending.get(i);
+            System.out.println("Socio a promover a VIP es: ");
+            System.out.println(selectedPartner.toString());
+
+            selectedPartner.setType(SubscriptionType.VIP);
+            this.service.updatePartner(selectedPartner);
+            System.out.println("Socio actualizado a VIP exitosamente.\n");   
         }
-        
-        if(selectedPartner == null){
-            System.out.println("ID de socio no válido.");
-            return;
-        }
-        
-        selectedPartner.setType(SubscriptionType.VIP);
-        this.service.updatePartner(selectedPartner);
-        System.out.println("Socio actulizado a VIP exitosamente.");
     }
 }

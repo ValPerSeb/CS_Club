@@ -24,7 +24,7 @@ public class InvoiceDao {
             invoice.setId(resultSet.getLong("ID"));
             invoice.setCreationDate(resultSet.getTimestamp("CREATIONDATE"));
             invoice.setAmount(resultSet.getDouble("AMOUNT"));
-            invoice.setInvoiceStatus(InvoiceStatus.valueOf(resultSet.getString("STATUS")));
+            invoice.setStatus(InvoiceStatus.valueOf(resultSet.getString("STATUS")));
             Person person = new Person();
             person.setId(resultSet.getLong("PERSONID"));
             invoice.setPersonId(person);
@@ -41,9 +41,9 @@ public class InvoiceDao {
     
     public List<InvoiceDto> getInvoicesByRole(Role role) throws Exception {
         List<InvoiceDto> invoicesDto = new ArrayList<>();
-        String query = "SELECT INVOICE.ID,INVOICE.CREATIONDATE,INVOICE.AMOUNT,INVOICE.STATUS,INVOICE.PERSONID,INVOICE.PARTNERID FROM INVOICE "
-                + "JOIN USER ON INVOICE.PERSONID = USER.PERSONNID "
-                + "WHERE USER.ROLE = ?";
+        String query = "SELECT I.ID,I.CREATIONDATE,I.AMOUNT,I.STATUS,I.PERSONID,I.PARTNERID FROM INVOICE I "
+                + "JOIN USER U ON I.PERSONID = U.PERSONNID "
+                + "WHERE U.ROLE = ?";
         PreparedStatement preparedStatement = DBConnection.getConnection().prepareStatement(query);
         preparedStatement.setString(1, role.toString());
         ResultSet resultSet = preparedStatement.executeQuery();
@@ -52,7 +52,7 @@ public class InvoiceDao {
             invoice.setId(resultSet.getLong("ID"));
             invoice.setCreationDate(resultSet.getTimestamp("CREATIONDATE"));
             invoice.setAmount(resultSet.getDouble("AMOUNT"));
-            invoice.setInvoiceStatus(InvoiceStatus.valueOf(resultSet.getString("STATUS")));
+            invoice.setStatus(InvoiceStatus.valueOf(resultSet.getString("STATUS")));
             Person person = new Person();
             person.setId(resultSet.getLong("PERSONID"));
             invoice.setPersonId(person);

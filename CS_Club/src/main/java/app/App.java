@@ -10,7 +10,7 @@ public class App {
     public static void main(String[] args) {
         ControllerInterface controller = new LoginController();
         try {
-            DBConnection.getConnection();
+            //DBConnection.getConnection();
             controller.session();
         } catch (Exception e) {
             System.out.println(e.getMessage());

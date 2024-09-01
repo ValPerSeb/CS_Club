@@ -9,7 +9,7 @@ public class Invoice {
     private Partner partnerId;
     private Timestamp creationDate;
     private double amount;
-    private InvoiceStatus invoiceStatus;
+    private InvoiceStatus status;
 
     public Invoice() {
     }
@@ -54,11 +54,11 @@ public class Invoice {
         this.amount = amount;
     }
 
-    public InvoiceStatus getInvoiceStatus() {
-        return invoiceStatus;
+    public InvoiceStatus getStatus() {
+        return status;
     }
 
-    public void setInvoiceStatus(InvoiceStatus invoiceStatus) {
-        this.invoiceStatus = invoiceStatus;
+    public void setStatus(InvoiceStatus status) {
+        this.status = status;
     }
 }

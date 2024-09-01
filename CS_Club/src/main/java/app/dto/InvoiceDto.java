@@ -10,7 +10,7 @@ public class InvoiceDto {
     private PartnerDto partnerId;
     private Timestamp creationDate;
     private double amount;
-    private InvoiceStatus invoiceStatus;
+    private InvoiceStatus status;
 
     public InvoiceDto() {
     }
@@ -55,12 +55,12 @@ public class InvoiceDto {
         this.amount = amount;
     }
 
-    public InvoiceStatus getInvoiceStatus() {
-        return invoiceStatus;
+    public InvoiceStatus getStatus() {
+        return status;
     }
 
-    public void setInvoiceStatus(InvoiceStatus invoiceStatus) {
-        this.invoiceStatus = invoiceStatus;
+    public void setStatus(InvoiceStatus status) {
+        this.status = status;
     }
 
     @Override
@@ -71,7 +71,7 @@ public class InvoiceDto {
                 + "* ID Socio: " + partnerId.getId() + "\n"
                 + "* Fecha de generación: " + creationDate.toString() + "\n"
                 + "* Valor total: " + amount + "\n"
-                + "* Estado: " + invoiceStatus.toString() + "\n"
+                + "* Estado: " + status.toString() + "\n"
                 + "----------------------------------------------- \n";
     }
 }

@@ -73,7 +73,7 @@ public abstract class Helper {
             invoiceDto.setId(invoice.getId());
             invoiceDto.setCreationDate(invoice.getCreationDate());
             invoiceDto.setAmount(invoice.getAmount());
-            invoiceDto.setInvoiceStatus(invoice.getInvoiceStatus());
+            invoiceDto.setStatus(invoice.getStatus());
             invoiceDto.setPersonId(parse(invoice.getPersonId()));
             invoiceDto.setPartnerId(parse(invoice.getPartnerId()));
             return invoiceDto;
@@ -87,7 +87,7 @@ public abstract class Helper {
             invoice.setId(invoiceDto.getId());
             invoice.setCreationDate(invoiceDto.getCreationDate());
             invoice.setAmount(invoiceDto.getAmount());
-            invoice.setInvoiceStatus(invoiceDto.getInvoiceStatus());
+            invoice.setStatus(invoiceDto.getStatus());
             invoice.setPersonId(parse(invoiceDto.getPersonId()));
             invoice.setPartnerId(parse(invoiceDto.getPartnerId()));
             return invoice;
