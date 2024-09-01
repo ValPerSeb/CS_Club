@@ -1,12 +1,8 @@
 
 package app.dto;
 
-import app.model.Invoice;
-import app.model.InvoiceStatus;
 import app.model.SubscriptionType;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
 
 public class PartnerDto {
     private long id;
@@ -14,9 +10,7 @@ public class PartnerDto {
     private double amount;
     private SubscriptionType type;
     private Timestamp creationDate;
-    private final double maxAmountVIP = 5000000;
-    private final double maxAmountRegular = 1000000;
-    private List<Invoice> invoicesInfo = new ArrayList<>();
+    private double totalInvoicesAmountPaid;
 
     public PartnerDto() {
     }
@@ -61,32 +55,12 @@ public class PartnerDto {
         this.creationDate = creationDate;
     }
 
-    public List<Invoice> getInvoicesInfo() {
-        return invoicesInfo;
+    public double getTotalInvoicesAmountPaid() {
+        return totalInvoicesAmountPaid;
     }
 
-    public void setInvoicesInfo(List<Invoice> invoicesInfo) {
-        this.invoicesInfo = invoicesInfo;
-    }
-
-    public double calcPaidInvoicesTotal() {
-        double paidInvoicesTotal = 0;
-        for(Invoice invoice : this.getInvoicesInfo()){
-            if(invoice.getStatus() == InvoiceStatus.PAID){
-                paidInvoicesTotal += invoice.getAmount();
-            }
-        }
-        return paidInvoicesTotal;
-    }
-    
-    public void increaseAmount(double addAmount) throws Exception{
-        double newAmount = this.amount + addAmount;
-        if(this.type == SubscriptionType.VIP && newAmount > this.maxAmountVIP){
-            throw new Exception("Nuevo monto de fondos supera el máximo permitido \n"
-                + "- VIP: " + this.maxAmountVIP + "\n"
-                + "- REGULARES: " + this.maxAmountRegular + "\n");
-        }
-        this.amount = newAmount;
+    public void setTotalInvoicesAmountPaid(double totalInvoicesAmountPaid) {
+        this.totalInvoicesAmountPaid = totalInvoicesAmountPaid;
     }
     
     @Override

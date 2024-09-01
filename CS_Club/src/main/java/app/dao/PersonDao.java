@@ -6,6 +6,7 @@ import app.dto.PersonDto;
 import app.model.Person;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.Collections;
 
 public class PersonDao {
     public boolean existsByDocument(PersonDto personDto) throws Exception {
@@ -30,11 +31,16 @@ public class PersonDao {
         preparedStatement.close();
     }
 
-    public void deletePerson(PersonDto personDto) throws Exception {
-        Person person = Helper.parse(personDto);
-        String query = "DELETE FROM PERSON WHERE DOCUMENT = ?";
+    public void deletePerson(long[] ids) throws Exception {
+        if (ids == null || ids.length == 0) {
+            throw new Exception("Error en la lista de IDS.");
+        }
+        String placeholders = String.join(",", Collections.nCopies(ids.length, "?"));
+        String query = "DELETE FROM PERSON WHERE ID IN (" + placeholders + ")";
         PreparedStatement preparedStatement = DBConnection.getConnection().prepareStatement(query);
-        preparedStatement.setLong(1,person.getDocument());
+        for (int i = 0; i < ids.length; i++) {
+            preparedStatement.setLong(i + 1, ids[i]);
+        }
         preparedStatement.execute();
         preparedStatement.close();	
     }

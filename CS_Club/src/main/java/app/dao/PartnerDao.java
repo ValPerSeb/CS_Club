@@ -4,13 +4,12 @@ package app.dao;
 import app.config.DBConnection;
 import java.sql.PreparedStatement;
 import app.dto.PartnerDto;
-import app.model.Invoice;
-import app.model.InvoiceStatus;
 import app.model.Partner;
 import app.model.SubscriptionType;
 import app.model.User;
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class PartnerDao {
@@ -28,11 +27,11 @@ public class PartnerDao {
     
     public List<PartnerDto> getPartnersByType(SubscriptionType type) throws Exception{
         List<PartnerDto> partnersDto = new ArrayList<>();
-        List<Invoice> invoicesInfo = new ArrayList<>();
-        String query = "SELECT P.ID,P.CREATIONDATE,P.AMOUNT,P.TYPE,P.USERID,I.ID AS INVOICE_ID,I.SATUS,I.AMOUNT AS INVOICE_AMOUNT "
+        String query = "SELECT P.ID,P.CREATIONDATE,P.AMOUNT,P.TYPE,P.USERID, SUM(I.AMOUNT) AS TOTAL_INVOICE_AMOUNT "
                 + "FROM PARTNER P "
-                + "JOIN INVOICE I ON I.PARTNERID = P.ID "
-                + "WHERE P.TYPE = ?";
+                + "LEFT JOIN INVOICE I ON I.PARTNERID = P.ID AND I.STATUS = 'PAID' "
+                + "WHERE P.TYPE = ? "
+                + "GROUP BY P.ID, P.CREATIONDATE, P.AMOUNT, P.TYPE, P.USERID";
         PreparedStatement preparedStatement = DBConnection.getConnection().prepareStatement(query);
         preparedStatement.setString(1, type.toString());
         ResultSet resultSet = preparedStatement.executeQuery();
@@ -42,19 +41,13 @@ public class PartnerDao {
             partner.setCreationDate(resultSet.getTimestamp("CREATIONDATE"));
             partner.setAmount(resultSet.getDouble("AMOUNT"));
             partner.setType(SubscriptionType.valueOf(resultSet.getString("TYPE")));
-            User user = new User();
             
+            User user = new User();
             user.setId(resultSet.getLong("USERID"));
             partner.setUserId(user);
             
-            Invoice invoice = new Invoice();
-            invoice.setId(resultSet.getLong("INVOICE_ID"));
-            invoice.setStatus(InvoiceStatus.valueOf(resultSet.getString("STATUS")));
-            invoice.setAmount(resultSet.getDouble("INVOICE_AMOUNT"));
-            invoicesInfo.add(invoice);
-            
             PartnerDto partnerDto = Helper.parse(partner);
-            partnerDto.setInvoicesInfo(invoicesInfo);
+            partnerDto.setTotalInvoicesAmountPaid(resultSet.getDouble("TOTAL_INVOICE_AMOUNT"));
             
             partnersDto.add(partnerDto);
         }
@@ -73,5 +66,42 @@ public class PartnerDao {
         preparedStatement.setLong(4, partner.getId());
         preparedStatement.execute();
         preparedStatement.close();
+    }
+    
+    public PartnerDto getPartnerByUserId(long userId) throws Exception {
+        String query = "SELECT ID,AMOUNT,CREATIONDATE,TYPE,USERID FROM PARTNER WHERE USERID = ?";
+        PreparedStatement preparedStatement = DBConnection.getConnection().prepareStatement(query);
+        preparedStatement.setLong(1, userId);
+        ResultSet resulSet = preparedStatement.executeQuery();
+        if (resulSet.next()) {
+            Partner partner = new Partner();
+            partner.setId(resulSet.getLong("ID"));
+            partner.setAmount(resulSet.getDouble("AMOUNT"));
+            partner.setCreationDate(resulSet.getTimestamp("CREATIONDATE"));;
+            partner.setType(SubscriptionType.valueOf(resulSet.getString("type")));
+            
+            User user = new User();
+            user.setId(resulSet.getLong("USERID"));
+            resulSet.close();
+            preparedStatement.close();
+            return Helper.parse(partner);
+        }
+        resulSet.close();
+        preparedStatement.close();
+        return null;
+    }
+    
+    public void deletePartner(long[] ids) throws Exception {
+        if (ids == null || ids.length == 0) {
+            throw new Exception("Error en la lista de IDS.");
+        }
+        String placeholders = String.join(",", Collections.nCopies(ids.length, "?"));
+        String query = "DELETE FROM PARTNER WHERE ID IN (" + placeholders + ")";
+        PreparedStatement preparedStatement = DBConnection.getConnection().prepareStatement(query);
+        for (int i = 0; i < ids.length; i++) {
+            preparedStatement.setLong(i + 1, ids[i]);
+        }
+        preparedStatement.execute();
+        preparedStatement.close();	
     }
 }

@@ -8,6 +8,7 @@ import app.model.User;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import app.model.Role;
+import java.util.Collections;
 
 public class UserDao {
     public UserDto findByUserName(UserDto userDto) throws Exception {
@@ -56,11 +57,16 @@ public class UserDao {
         preparedStatement.close();
     }
     
-    public void deleteUser(UserDto userDto) throws Exception {
-        User user = Helper.parse(userDto);
-        String query = "DELETE FROM USER WHERE ID = ?";
+    public void deleteUser(long[] ids) throws Exception {
+        if (ids == null || ids.length == 0) {
+            throw new Exception("Error en la lista de IDS.");
+        }
+        String placeholders = String.join(",", Collections.nCopies(ids.length, "?"));
+        String query = "DELETE FROM USER WHERE ID IN (" + placeholders + ")";
         PreparedStatement preparedStatement = DBConnection.getConnection().prepareStatement(query);
-        preparedStatement.setLong(1,user.getId());
+        for (int i = 0; i < ids.length; i++) {
+            preparedStatement.setLong(i + 1, ids[i]);
+        }
         preparedStatement.execute();
         preparedStatement.close();	
     }

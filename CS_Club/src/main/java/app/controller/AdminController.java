@@ -133,7 +133,6 @@ public class AdminController implements ControllerInterface{
     
     private void invoicesHistory() throws Exception{
         List<InvoiceDto> invoicesDto = this.service.getAllInvoices();
-        System.out.println(invoicesDto.size());
         if(invoicesDto.size() < 1){
             System.out.println("No se encontraron datos.");
             return;
@@ -175,7 +174,7 @@ public class AdminController implements ControllerInterface{
             System.out.println(partnerDto.toString());
         }
         
-        partnersDtoPending.sort(Comparator.comparingDouble(PartnerDto::calcPaidInvoicesTotal).reversed()
+        partnersDtoPending.sort(Comparator.comparingDouble(PartnerDto::getTotalInvoicesAmountPaid).reversed()
             .thenComparingDouble(PartnerDto::getAmount).reversed()
             .thenComparing(PartnerDto::getCreationDate));
         

@@ -7,6 +7,7 @@ import app.dao.PartnerDao;
 import app.dao.PersonDao;
 import app.dao.UserDao;
 import app.dto.GuestDto;
+import app.dto.InvoiceDetailDto;
 import app.dto.InvoiceDto;
 import app.dto.PartnerDto;
 import app.dto.PersonDto;
@@ -56,7 +57,7 @@ public class Service {
         try {
             this.personDao.createPerson(personDto);
         } catch (SQLException e) {
-            throw new Exception("Error creando Persona: " + e.getMessage());
+            throw new Exception("Error creando Persona: " + e);
         }
     }
     
@@ -64,14 +65,15 @@ public class Service {
         this.createPerson(userDto.getPersonId());
         PersonDto personDto = personDao.findByDocument(userDto.getPersonId());
         userDto.setPersonId(personDto);
+        long[] ids = {userDto.getPersonId().getId()};
         if (this.userDao.existsByUserName(userDto)) {
-            this.personDao.deletePerson(userDto.getPersonId());
+            this.personDao.deletePerson(ids);
             throw new Exception("Ya existe un usuario con ese Nombre de Usuario");
         }
         try {
             this.userDao.createUser(userDto);
         } catch (SQLException e) {
-            this.personDao.deletePerson(userDto.getPersonId());
+            this.personDao.deletePerson(ids);
             throw new Exception("Error creando Usuario: " + e.getMessage());
         }
     }
@@ -84,8 +86,10 @@ public class Service {
             this.partnerDao.createPartner(partnerDto);
             System.out.println("Se ha creado el socio correctamente");
         } catch (SQLException e) {
-            this.personDao.deletePerson(userDto.getPersonId());
-            this.userDao.deleteUser(partnerDto.getUserId());
+            long[] idsPerson = {userDto.getPersonId().getId()};
+            long[] idsUser = {partnerDto.getUserId().getId()};
+            this.personDao.deletePerson(idsPerson);
+            this.userDao.deleteUser(idsUser);
             throw new Exception("Error creando Socio: " + e.getMessage());
         }
         
@@ -99,9 +103,11 @@ public class Service {
             this.guestDao.createGuest(guestDto);
             System.out.println("Se ha creado el invitado correctamente");
         } catch (SQLException e) {
-            this.personDao.deletePerson(userDto.getPersonId());
-            this.userDao.deleteUser(guestDto.getUserId());
-            throw new Exception("Error creando Invitado: " + e.getMessage());
+            long[] idsPerson = {userDto.getPersonId().getId()};
+            long[] idsUser = {guestDto.getUserId().getId()};
+            this.personDao.deletePerson(idsPerson);
+            this.userDao.deleteUser(idsUser);
+            throw new Exception("Error creando Invitado: " + e);
         }
     }
     
@@ -109,7 +115,7 @@ public class Service {
         try {
             return this.invoiceDao.getAllInvoices();
         } catch (SQLException e) {
-            throw new Exception("Error obteniendo datos de facturas");
+            throw new Exception("Error obteniendo datos de facturas: " + e);
         }
     }
     
@@ -117,7 +123,7 @@ public class Service {
         try {
             return this.invoiceDao.getInvoicesByRole(role);
         } catch (SQLException e) {
-            throw new Exception("Error obteniendo datos de facturas por rol");
+            throw new Exception("Error obteniendo datos de facturas por rol: " + e);
         }
     }
     
@@ -125,7 +131,7 @@ public class Service {
         try {
             return this.partnerDao.getPartnersByType(type);
         } catch (SQLException e) {
-            throw new Exception("Error obteniendo datos de socio por tipo de suscripción");
+            throw new Exception("Error obteniendo datos de socio por tipo de suscripción: " + e);
         }
     }
     
@@ -133,7 +139,62 @@ public class Service {
         try {
             this.partnerDao.updatePartner(partnerDto);
         } catch (SQLException e) {
-            throw new Exception("Error actualizando datos del Socio");
+            throw new Exception("Error actualizando datos del Socio: " + e);
+        }
+    }
+    
+    public PartnerDto getCurrentPartner() throws Exception{
+        try {
+            return this.partnerDao.getPartnerByUserId(user.getId());
+        } catch (SQLException e) {
+            throw new Exception("Error obteniendo datos del Socio: " + e);
+        }
+    }
+     
+    public void deleteInvoicesByCurrentPartnerId() throws Exception {
+        try {
+            this.invoiceDao.deleteInvoicesByPartnerId(user.getId());
+        } catch (SQLException e) {
+            throw new Exception("Error eliminando facturas del socio: " + e);
+        }
+    }
+    
+    public void deleteGuestsByCurrentPartnerId() throws Exception {
+        try {
+            this.guestDao.deleteGuestsByPartnerId(user.getId());
+        } catch (SQLException e) {
+            throw new Exception("Error eliminando invitados del socio: " + e);
+        }
+    }
+    
+    public void deleteCurrentPartner() throws Exception {
+        try {
+            long[] ids = {user.getId()};
+            this.partnerDao.deletePartner(ids);
+        } catch (SQLException e) {
+            throw new Exception("Error eliminando invitados del socio: " + e);
+        }
+    }
+    
+    public List<InvoiceDto> getPendingInvoicesByCurrentPartnerId() throws Exception {
+        try {
+            return this.invoiceDao.getPendingInvoicesByPartnerId(user.getId());
+        } catch (SQLException e) {
+            throw new Exception("Error obteniendo datos de facturas pendientes: " + e);
+        }
+    }
+    
+    public void createInvoice(InvoiceDetailDto invoiceDetailDto) throws Exception {
+        try {
+            PersonDto personDto = new PersonDto();
+            personDto.setId(user.getPersonId().getId());
+            invoiceDetailDto.getInvoiceId().setPersonId(personDto);
+            
+            this.invoiceDao.createInvoice(invoiceDetailDto.getInvoiceId());
+            this.invoiceDao.createInvoiceDetail(invoiceDetailDto);
+            System.out.println("Factura creada con éxito.");
+        } catch (SQLException e) {
+            throw new Exception("Error obteniendo datos de facturas por rol: " + e);
         }
     }
 }
