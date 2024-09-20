@@ -23,7 +23,7 @@ public class UserDao {
             user.setPassword(resulSet.getString("PASSWORD"));;
             user.setRole(Role.valueOf(resulSet.getString("ROLE")));
             Person person = new Person();
-            person.setDocument(resulSet.getLong("PERSONNID"));
+            person.setId(resulSet.getLong("PERSONNID"));
             user.setPersonId(person);
             resulSet.close();
             preparedStatement.close();

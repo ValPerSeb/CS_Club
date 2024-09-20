@@ -12,6 +12,7 @@ import app.model.InvoiceStatus;
 import app.model.Role;
 import app.model.SubscriptionType;
 import app.service.Service;
+import static app.service.Service.user;
 import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.List;
@@ -24,7 +25,7 @@ public class PartnerController implements ControllerInterface{
             + "\n 4. Hacer consumo. "
             + "\n 5. Subir fondos. "
             + "\n 6. Solicitar baja. "
-            + "\n 7. Solicitar promoción a VIP. \n"
+            + "\n 7. Solicitar promoción a VIP."
             + "\n 8. Cerrar Sesión. \n";
 
     public PartnerController(){
@@ -80,7 +81,7 @@ public class PartnerController implements ControllerInterface{
             case "6": {
                 System.out.println("***Cancelar suscripción***");
                 this.cancelSubscription();
-                return true;
+                return!(user == null);
             }
             case "7": {
                 System.out.println("***Solicitar Promoción a VIP***");
@@ -130,11 +131,8 @@ public class PartnerController implements ControllerInterface{
         userDto.setPassword(password);
         userDto.setRole(Role.GUEST);
         
-        PartnerDto currentPartner = this.service.getCurrentPartner();
-        
         GuestDto guestDto = new GuestDto();
         guestDto.setUserId(userDto);
-        guestDto.setPartnerId(currentPartner);
         guestDto.setStatus(GuestStatus.INACTIVE);
         
         this.service.createGuest(guestDto);
@@ -180,29 +178,42 @@ public class PartnerController implements ControllerInterface{
         System.out.println("Eliminando Invitados del socio...");
         this.service.deleteGuestsByCurrentPartnerId();
         
-        System.out.println("Eliminando datos del socio...");
+        System.out.println("Eliminando datos del socio... \n");
         this.service.deleteCurrentPartner();
+        this.service.logout();
     }
     
     private void newService() throws Exception {
-        System.out.println("Ingrese la descripción del producto consumido: ");
-        String inputDesc = Utils.getReader().nextLine();
-        String desc = Utils.getValidator().isValidString("Descripción", inputDesc);
+        System.out.println("¿Cuantos consumos desea realizar?");
+        String inputCantProducts = Utils.getReader().nextLine();
+        int cantProducts = Utils.getValidator().isValidInteger("Cantidad de productos ", inputCantProducts);
+        InvoiceDetailDto details[] = new InvoiceDetailDto[cantProducts]; 
+        double totalInvoice = 0;
         
-        System.out.println("Ingrese precio del producto consumido: ");
-        String inputAmount = Utils.getReader().nextLine();
-        double amount = Utils.getValidator().isValidDouble("Precio", inputAmount);
-        
-        System.out.println("Ingrese cantidad del producto consumido: ");
-        String inputItem = Utils.getReader().nextLine();
-        int item = Utils.getValidator().isValidInteger("Cantidad", inputItem);
-        
-        InvoiceDetailDto invoiceDetailDto = new InvoiceDetailDto();
-        invoiceDetailDto.setAmount(amount);
-        invoiceDetailDto.setDescription(desc);
-        invoiceDetailDto.setItem(item);
-        
-        double totalInvoice = amount * item;
+        for (int i = 0; i < cantProducts; i++) {
+            System.out.println("Producto # " + (i+1) + ": \n");
+            System.out.println("Ingrese la descripción del producto consumido: ");
+            String inputDesc = Utils.getReader().nextLine();
+            String desc = Utils.getValidator().isValidString("Descripción", inputDesc);
+
+            System.out.println("Ingrese precio del producto consumido: ");
+            String inputAmount = Utils.getReader().nextLine();
+            double amount = Utils.getValidator().isValidDouble("Precio", inputAmount);
+
+            System.out.println("Ingrese cantidad del producto consumido: ");
+            String inputItem = Utils.getReader().nextLine();
+            int item = Utils.getValidator().isValidInteger("Cantidad", inputItem);
+            
+            totalInvoice += amount * item;
+            
+            InvoiceDetailDto invoiceDetailDto = new InvoiceDetailDto();
+            invoiceDetailDto.setAmount(amount);
+            invoiceDetailDto.setDescription(desc);
+            invoiceDetailDto.setItem(item);
+            
+            details[i] = invoiceDetailDto;
+        }
+            
         Calendar calendar = Calendar.getInstance();
         Timestamp creationDate = new Timestamp(calendar.getTimeInMillis());
         PartnerDto currentPartner = this.service.getCurrentPartner();
@@ -211,10 +222,8 @@ public class PartnerController implements ControllerInterface{
         invoiceDto.setAmount(totalInvoice);
         invoiceDto.setCreationDate(creationDate);
         invoiceDto.setStatus(InvoiceStatus.PENDING);
-        invoiceDto.setPartnerId(currentPartner);
+        invoiceDto.setPartnerId(currentPartner);        
         
-        invoiceDetailDto.setInvoiceId(invoiceDto);
-        
-        this.service.createInvoice(invoiceDetailDto);
+        this.service.createInvoice(invoiceDto,details);
     }
 }

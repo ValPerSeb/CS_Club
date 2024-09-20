@@ -24,6 +24,8 @@ public class Service {
     private PartnerDao partnerDao;
     private GuestDao guestDao;
     public static UserDto user;
+    public static PartnerDto partner;
+    public static PartnerDto guest;
     
     public Service() {
         this.userDao = new UserDao();
@@ -43,11 +45,18 @@ public class Service {
         }
         userDto.setRole(validateDto.getRole());
         user = validateDto;
+        if (user.getRole() == Role.PARTNER) {
+            partner = this.getCurrentPartner();
+        }else if(user.getRole() == Role.GUEST){
+            // TODO
+        }
     }
 
     public void logout() {
         user = null;
-        System.out.println("Se ha cerrado sesion");
+        partner = null;
+        guest = null;
+        System.out.println("Se ha cerrado sesion \n");
     }
     
     public void createPerson(PersonDto personDto) throws Exception {
@@ -96,6 +105,7 @@ public class Service {
     }
     
     public void createGuest(GuestDto guestDto) throws Exception {
+        guestDto.setPartnerId(partner);
         this.createUser(guestDto.getUserId());
         UserDto userDto = userDao.findByUserName(guestDto.getUserId());
         guestDto.setUserId(userDto);
@@ -153,7 +163,13 @@ public class Service {
      
     public void deleteInvoicesByCurrentPartnerId() throws Exception {
         try {
-            this.invoiceDao.deleteInvoicesByPartnerId(user.getId());
+            List<InvoiceDto> partnerInvoices = this.invoiceDao.getAllInvoicesByPartnerId(partner.getId());
+            long[] ids = new long[partnerInvoices.size()];
+            for (int i = 0; i < partnerInvoices.size(); i++) {
+                ids[i] = partnerInvoices.get(i).getId();
+            }
+            this.invoiceDao.deleteInvoicesDetailsByInvoiceId(ids);
+            this.invoiceDao.deleteInvoicesByPartnerId(partner.getId());
         } catch (SQLException e) {
             throw new Exception("Error eliminando facturas del socio: " + e);
         }
@@ -161,16 +177,24 @@ public class Service {
     
     public void deleteGuestsByCurrentPartnerId() throws Exception {
         try {
-            this.guestDao.deleteGuestsByPartnerId(user.getId());
+            List<GuestDto> partnerGuests = this.guestDao.getGuestsByPartnerId(partner.getId());
+            long[] ids = new long[partnerGuests.size()];
+            for (int i = 0; i < partnerGuests.size(); i++) {
+                ids[i] = partnerGuests.get(i).getUserId().getId();
+            }
+            this.userDao.deleteUser(ids);
+            this.guestDao.deleteGuestsByPartnerId(partner.getId());
         } catch (SQLException e) {
             throw new Exception("Error eliminando invitados del socio: " + e);
         }
     }
-    
+
     public void deleteCurrentPartner() throws Exception {
         try {
-            long[] ids = {user.getId()};
-            this.partnerDao.deletePartner(ids);
+            long[] idsPartner = {partner.getId()};
+            long[] idsUser = {user.getId()};
+            this.partnerDao.deletePartner(idsPartner);
+            this.userDao.deleteUser(idsUser);
         } catch (SQLException e) {
             throw new Exception("Error eliminando invitados del socio: " + e);
         }
@@ -178,21 +202,25 @@ public class Service {
     
     public List<InvoiceDto> getPendingInvoicesByCurrentPartnerId() throws Exception {
         try {
-            return this.invoiceDao.getPendingInvoicesByPartnerId(user.getId());
+            return this.invoiceDao.getPendingInvoicesByPartnerId(partner.getId());
         } catch (SQLException e) {
             throw new Exception("Error obteniendo datos de facturas pendientes: " + e);
         }
     }
     
-    public void createInvoice(InvoiceDetailDto invoiceDetailDto) throws Exception {
+    public void createInvoice(InvoiceDto invoiceDto, InvoiceDetailDto details[]) throws Exception {
         try {
             PersonDto personDto = new PersonDto();
             personDto.setId(user.getPersonId().getId());
-            invoiceDetailDto.getInvoiceId().setPersonId(personDto);
+            invoiceDto.setPersonId(personDto);
             
-            this.invoiceDao.createInvoice(invoiceDetailDto.getInvoiceId());
-            this.invoiceDao.createInvoiceDetail(invoiceDetailDto);
-            System.out.println("Factura creada con éxito.");
+            InvoiceDto newInvoice = this.invoiceDao.createInvoice(invoiceDto);
+            for (int i = 0; i < details.length; i++) {
+                details[i].setInvoiceId(newInvoice);
+                this.invoiceDao.createInvoiceDetail(details[i]);
+            }
+            
+            System.out.println("Factura creada con éxito. \n");
         } catch (SQLException e) {
             throw new Exception("Error obteniendo datos de facturas por rol: " + e);
         }
