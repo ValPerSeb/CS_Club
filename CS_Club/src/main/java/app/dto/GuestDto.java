@@ -43,6 +43,16 @@ public class GuestDto {
     public void setStatus(GuestStatus status) {
         this.status = status;
     }
+    
+    @Override
+    public String toString() {
+        return "----------------------------------------------- \n"
+                + "* ID: " + id + "\n"
+                + "* ID Usuario: " + userId.getId() + "\n"
+                + "* ID Socio: " + partnerId.getId() + "\n"
+                + "* Estado: " + status.toString() + "\n"
+                + "----------------------------------------------- \n";
+    }
 }
 
 

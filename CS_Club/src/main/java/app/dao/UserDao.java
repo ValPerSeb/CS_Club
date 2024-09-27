@@ -70,4 +70,14 @@ public class UserDao {
         preparedStatement.execute();
         preparedStatement.close();	
     }
+    
+    public void updateUser(UserDto userDto)throws Exception{
+        User user = Helper.parse(userDto);
+        String query = "UPDATE USER SET ROLE = ? WHERE ID = ?";
+        PreparedStatement preparedStatement = DBConnection.getConnection().prepareStatement(query);
+        preparedStatement.setString(1, user.getRole().toString());
+        preparedStatement.setLong(2, user.getId());
+        preparedStatement.execute();
+        preparedStatement.close();
+    }
 }

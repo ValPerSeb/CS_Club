@@ -12,6 +12,8 @@ import app.dto.InvoiceDto;
 import app.dto.PartnerDto;
 import app.dto.PersonDto;
 import app.dto.UserDto;
+import app.model.GuestStatus;
+import app.model.InvoiceStatus;
 import app.model.Role;
 import app.model.SubscriptionType;
 import java.sql.SQLException;
@@ -25,7 +27,7 @@ public class Service {
     private GuestDao guestDao;
     public static UserDto user;
     public static PartnerDto partner;
-    public static PartnerDto guest;
+    public static GuestDto guest;
     
     public Service() {
         this.userDao = new UserDao();
@@ -48,7 +50,7 @@ public class Service {
         if (user.getRole() == Role.PARTNER) {
             partner = this.getCurrentPartner();
         }else if(user.getRole() == Role.GUEST){
-            // TODO
+            guest = this.getCurrentGuest();
         }
     }
 
@@ -121,6 +123,19 @@ public class Service {
         }
     }
     
+    public void createPartnerFromGuest(PartnerDto partnerDto) throws Exception {
+        partnerDto.setUserId(user);
+        user.setRole(Role.PARTNER);
+        guest.setStatus(GuestStatus.INACTIVE);
+        try {
+            this.partnerDao.createPartner(partnerDto);
+            this.updateUser(user);
+            this.updateGuest(guest);
+        } catch (SQLException e) {
+            throw new Exception("Error creando Socio: " + e.getMessage());
+        }
+    }
+    
     public List<InvoiceDto> getAllInvoices() throws Exception {
         try {
             return this.invoiceDao.getAllInvoices();
@@ -158,6 +173,14 @@ public class Service {
             return this.partnerDao.getPartnerByUserId(user.getId());
         } catch (SQLException e) {
             throw new Exception("Error obteniendo datos del Socio: " + e);
+        }
+    }
+    
+    public GuestDto getCurrentGuest() throws Exception{
+        try {
+            return this.guestDao.getGuestByUserId(user.getId());
+        } catch (SQLException e) {
+            throw new Exception("Error obteniendo datos del Invitado: " + e);
         }
     }
      
@@ -223,6 +246,54 @@ public class Service {
             System.out.println("Factura creada con éxito. \n");
         } catch (SQLException e) {
             throw new Exception("Error obteniendo datos de facturas por rol: " + e);
+        }
+    }
+    
+    public double payPendingInvoices(double currentAmount) throws Exception {
+        List<InvoiceDto> pendingInvoices = this.getPendingInvoicesByCurrentPartnerId();
+        double newAmount = currentAmount;
+        for(InvoiceDto invoice : pendingInvoices){
+            double newAmountToSet = newAmount - invoice.getAmount();
+            if(newAmountToSet >= 0){
+                invoice.setStatus(InvoiceStatus.PAID);
+                this.invoiceDao.updateInvoice(invoice);
+                newAmount = newAmountToSet;
+                System.out.println("Factura " + invoice.getId() + " pagada: -" + invoice.getAmount() + "\n");
+            }
+        }
+        System.out.println("Nuevo saldo: " + newAmount + "\n");
+        return newAmount;
+    }
+    
+    public List<GuestDto> getGuestsByCurrentPartner() throws Exception {
+        try {
+            return this.guestDao.getGuestsByPartnerId(partner.getId());
+        } catch (SQLException e) {
+            throw new Exception("Error obteniendo datos de invitados del socio: " + e);
+        }
+    }
+    
+    public void updateGuest(GuestDto guestDto) throws Exception{
+        try {
+            this.guestDao.updateGuest(guestDto);
+        } catch (SQLException e) {
+            throw new Exception("Error actualizando datos del Invitado: " + e);
+        }
+    }
+    
+    public void updateUser(UserDto userDto) throws Exception{
+        try {
+            this.userDao.updateUser(userDto);
+        } catch (SQLException e) {
+            throw new Exception("Error actualizando datos del usuario: " + e);
+        }
+    }
+    
+    public List<InvoiceDto> getAllInvoicesByPartnerId() throws Exception {
+        try {
+            return this.invoiceDao.getAllInvoicesByPartnerId(partner.getId());
+        } catch (SQLException e) {
+            throw new Exception("Error obteniendo datos de facturas: " + e);
         }
     }
 }

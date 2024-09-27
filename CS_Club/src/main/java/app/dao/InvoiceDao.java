@@ -174,4 +174,14 @@ public class InvoiceDao {
         preparedStatement.execute();
         preparedStatement.close();
     }
+    
+    public void updateInvoice(InvoiceDto invoiceDto) throws Exception{
+        Invoice invoice = Helper.parse(invoiceDto);
+        String query = "UPDATE INVOICE SET STATUS = ? WHERE ID = ?";
+        PreparedStatement preparedStatement = DBConnection.getConnection().prepareStatement(query);
+        preparedStatement.setString(1, invoice.getStatus().toString());
+        preparedStatement.setLong(2, invoice.getId());
+        preparedStatement.execute();
+        preparedStatement.close();
+    }
 }

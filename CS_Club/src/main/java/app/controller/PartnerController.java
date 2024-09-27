@@ -26,7 +26,8 @@ public class PartnerController implements ControllerInterface{
             + "\n 5. Subir fondos. "
             + "\n 6. Solicitar baja. "
             + "\n 7. Solicitar promoción a VIP."
-            + "\n 8. Cerrar Sesión. \n";
+            + "\n 8. Historial de Facturas Socio."
+            + "\n 9. Cerrar Sesión. \n";
 
     public PartnerController(){
         this.service = new Service();
@@ -61,11 +62,13 @@ public class PartnerController implements ControllerInterface{
                 return true;
             }
             case "2": {
-                System.out.println("***Activación de Invitado***"); //TODO
+                System.out.println("***Activación de Invitado***");
+                this.activateGuest();
                 return true;
             }
             case "3": {
-                System.out.println("***Desactivación de Invitado***"); //TODO
+                System.out.println("***Desactivación de Invitado***");
+                this.deactivateGuest();
                 return true;
             }
             case "4": {
@@ -89,6 +92,11 @@ public class PartnerController implements ControllerInterface{
                 return true;
             }
             case "8": {
+                System.out.println("***Historial de Facturas Socio***");
+                this.showInvoices();
+                return true;
+            }
+            case "9": {
                 System.out.println("Se ha cerrado sesión.");
                 return false;
             }
@@ -154,17 +162,20 @@ public class PartnerController implements ControllerInterface{
                 + "- VIP: " + maxAmountVIP + "\n"
                 + "- REGULARES: " + maxAmountRegular + "\n");
         }
+        
+        newAmount = this.service.payPendingInvoices(newAmount);
+        
         currentPartner.setAmount(newAmount);
         
         this.service.updatePartner(currentPartner);
-        System.out.println("Fondos actualizados correctamente.");
+        System.out.println("Fondos actualizados correctamente.\n");
     }
     
     private void requestVIPUpgrade() throws Exception {
         PartnerDto currentPartner = this.service.getCurrentPartner();
         currentPartner.setType(SubscriptionType.PENDING_VIP);
         this.service.updatePartner(currentPartner);
-        System.out.println("La solicitud ha sido creada exitosamente.");
+        System.out.println("La solicitud ha sido creada exitosamente.\n");
     }
     
     private void cancelSubscription() throws Exception {
@@ -225,5 +236,72 @@ public class PartnerController implements ControllerInterface{
         invoiceDto.setPartnerId(currentPartner);        
         
         this.service.createInvoice(invoiceDto,details);
+    }
+    
+    private void activateGuest() throws Exception {
+        PartnerDto currentPartner = this.service.getCurrentPartner();
+        List<GuestDto> guests = this.service.getGuestsByCurrentPartner();
+        int currentActive = 0;
+        
+        System.out.println("Lista de Invitados del socio:");
+        for(GuestDto guest : guests){
+            System.out.println(guest.toString());
+            if(guest.getStatus() == GuestStatus.ACTIVE){
+                currentActive++;
+            }
+        }
+        
+        if(currentPartner.getType() != SubscriptionType.VIP && currentActive >= 3){
+            throw new Exception("Excede límite de invitados activos permitido \n");
+        }
+        
+        System.out.println("Ingrese el ID del invitado a activar: ");
+        String idGuestToActivateInput = Utils.getReader().nextLine();
+        Long idGuestToActivate = Utils.getValidator().isValidLong("ID Invitado", idGuestToActivateInput);
+        
+        for(GuestDto guest : guests){
+            if(guest.getId() == idGuestToActivate && guest.getStatus() != GuestStatus.ACTIVE){
+                guest.setStatus(GuestStatus.ACTIVE);
+                this.service.updateGuest(guest);
+                System.out.println("Invitado activado exitosamente");
+            }else if(guest.getId() == idGuestToActivate){
+                throw new Exception("Invitado ya se encuentra activado \n");
+            }
+        }
+    }
+    
+    
+    private void deactivateGuest() throws Exception {
+        List<GuestDto> guests = this.service.getGuestsByCurrentPartner();
+        
+        System.out.println("Lista de Invitados del socio:");
+        for(GuestDto guest : guests){
+            System.out.println(guest.toString());
+        }
+        
+        System.out.println("Ingrese el ID del invitado a desactivar: ");
+        String idGuestToDeactivateInput = Utils.getReader().nextLine();
+        Long idGuestToDeactivate = Utils.getValidator().isValidLong("ID Invitado", idGuestToDeactivateInput);
+        
+        for(GuestDto guest : guests){
+            if(guest.getId() == idGuestToDeactivate && guest.getStatus() != GuestStatus.INACTIVE){
+                guest.setStatus(GuestStatus.INACTIVE);
+                this.service.updateGuest(guest);
+                System.out.println("Invitado desactivado exitosamente");
+            }else if(guest.getId() == idGuestToDeactivate){
+                throw new Exception("Invitado ya se encuentra desactivado \n");
+            }
+        }
+    }
+    
+    private void showInvoices() throws Exception {
+        List<InvoiceDto> invoicesDto = this.service.getAllInvoicesByPartnerId();
+        if(invoicesDto.size() < 1){
+            System.out.println("No se encontraron datos.");
+            return;
+        }
+        for(InvoiceDto invoiceDto : invoicesDto){
+            System.out.println(invoiceDto.toString());
+        }
     }
 }
