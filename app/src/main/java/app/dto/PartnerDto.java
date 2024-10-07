@@ -10,7 +10,7 @@ public class PartnerDto {
     private double amount;
     private SubscriptionType type;
     private Timestamp creationDate;
-    //private double totalInvoicesAmountPaid;
+    private double totalInvoicesAmountPaid;
 
     public PartnerDto() {
     }
@@ -55,13 +55,13 @@ public class PartnerDto {
         this.creationDate = creationDate;
     }
 
-    /*public double getTotalInvoicesAmountPaid() {
+    public double getTotalInvoicesAmountPaid() {
         return totalInvoicesAmountPaid;
     }
 
     public void setTotalInvoicesAmountPaid(double totalInvoicesAmountPaid) {
         this.totalInvoicesAmountPaid = totalInvoicesAmountPaid;
-    }*/
+    }
     
     @Override
     public String toString() {

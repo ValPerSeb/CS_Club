@@ -72,7 +72,7 @@ public class AdminController implements ControllerInterface{
             }
             case "5": {
                     System.out.println("***Promoción a VIP de socios***\n");
-                    //this.upgradePartner();
+                    this.upgradePartner();
                     return true;
             }
             case "6": {
@@ -153,7 +153,7 @@ public class AdminController implements ControllerInterface{
         }
     }
     
-    /*private void upgradePartner() throws Exception{
+    private void upgradePartner() throws Exception{
         List<PartnerDto> partnersDtoPending = this.service.getPartnersByType(SubscriptionType.PENDING_VIP);
         List<PartnerDto> partnersDtoVIP = this.service.getPartnersByType(SubscriptionType.VIP);
         
@@ -187,5 +187,5 @@ public class AdminController implements ControllerInterface{
             this.service.updatePartner(selectedPartner);
             System.out.println("Socio actualizado a VIP exitosamente.\n");   
         }
-    }*/
+    }
 }

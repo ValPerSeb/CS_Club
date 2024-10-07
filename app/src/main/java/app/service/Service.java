@@ -18,6 +18,7 @@ import app.model.Role;
 import app.model.SubscriptionType;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Service {
     private UserDao userDao;
@@ -131,7 +132,7 @@ public class Service {
     
     public List<InvoiceDto> getAllInvoices() throws Exception {
         try {
-            return this.invoiceDao.getAllInvoices();
+            return this.invoiceDao.findAll();
         } catch (SQLException e) {
             throw new Exception("Error obteniendo datos de facturas: " + e);
         }
@@ -139,19 +140,19 @@ public class Service {
     
     public List<InvoiceDto> getInvoicesByRole(Role role) throws Exception {
         try {
-            return this.invoiceDao.getInvoicesByRole(role);
+            return this.invoiceDao.findByRole(role);
         } catch (SQLException e) {
             throw new Exception("Error obteniendo datos de facturas por rol: " + e);
         }
     }
     
-    /*public List<PartnerDto> getPartnersByType(SubscriptionType type) throws Exception{
+    public List<PartnerDto> getPartnersByType(SubscriptionType type) throws Exception{
         try {
-            return this.partnerDao.getPartnersByType(type);
+            return this.partnerDao.findByType(type);
         } catch (SQLException e) {
             throw new Exception("Error obteniendo datos de socio por tipo de suscripción: " + e);
         }
-    }*/
+    }
     
     public void updatePartner(PartnerDto partnerDto) throws Exception{
         try {
@@ -171,7 +172,7 @@ public class Service {
     
     public GuestDto getCurrentGuest() throws Exception{
         try {
-            return this.guestDao.getGuestByUserId(user.getId());
+            return this.guestDao.findByUserId(user);
         } catch (SQLException e) {
             throw new Exception("Error obteniendo datos del Invitado: " + e);
         }
@@ -186,7 +187,11 @@ public class Service {
     
     public List<InvoiceDto> getPendingInvoicesByCurrentPartnerId() throws Exception {
         try {
-            return this.invoiceDao.getPendingInvoicesByPartnerId(partner.getId());
+            List<InvoiceDto> invoices = this.invoiceDao.findByPartnerId(partner);
+            List<InvoiceDto> pendingInvoices = invoices.stream()
+                                                .filter(invoice -> invoice.getStatus() == InvoiceStatus.PENDING)
+                                                .collect(Collectors.toList());
+            return pendingInvoices;
         } catch (SQLException e) {
             throw new Exception("Error obteniendo datos de facturas pendientes: " + e);
         }
@@ -228,7 +233,7 @@ public class Service {
     
     public List<GuestDto> getGuestsByCurrentPartner() throws Exception {
         try {
-            return this.guestDao.getGuestsByPartnerId(partner.getId());
+            return this.guestDao.findByPartnerId(partner);
         } catch (SQLException e) {
             throw new Exception("Error obteniendo datos de invitados del socio: " + e);
         }
@@ -252,7 +257,7 @@ public class Service {
     
     public List<InvoiceDto> getAllInvoicesByPartnerId() throws Exception {
         try {
-            return this.invoiceDao.getAllInvoicesByPartnerId(partner.getId());
+            return this.invoiceDao.findByPartnerId(partner);
         } catch (SQLException e) {
             throw new Exception("Error obteniendo datos de facturas: " + e);
         }

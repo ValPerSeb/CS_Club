@@ -25,7 +25,7 @@ public class User {
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     @Column(name="id")
     private long id;
-    @JoinColumn(name="personid")
+    @JoinColumn(name="personnid")
     @OneToOne
     private Person personId;
     @Column(name="username")

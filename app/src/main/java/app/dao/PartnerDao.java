@@ -1,15 +1,14 @@
 
 package app.dao;
 
-import app.config.DBConnection;
 import app.dao.repositories.PartnerRepository;
-import java.sql.PreparedStatement;
+import app.dto.InvoiceDto;
 import app.dto.PartnerDto;
 import app.dto.UserDto;
+import app.model.InvoiceStatus;
 import app.model.Partner;
 import app.model.SubscriptionType;
 import app.model.User;
-import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.Getter;
@@ -25,6 +24,8 @@ import org.springframework.stereotype.Service;
 
 public class PartnerDao {
     
+    InvoiceDao invoiceDao = new InvoiceDao();
+    
     @Autowired
     public PartnerRepository partnerRepository;
     
@@ -32,38 +33,6 @@ public class PartnerDao {
         Partner partner = Helper.parse(partnerDto);
         partnerRepository.save(partner);
     }
-    
-    /*public List<PartnerDto> getPartnersByType(SubscriptionType type) throws Exception{
-        List<PartnerDto> partnersDto = new ArrayList<>();
-       String query = "SELECT P.ID,P.CREATIONDATE,P.AMOUNT,P.TYPE,P.USERID, SUM(I.AMOUNT) AS TOTAL_INVOICE_AMOUNT "
-                + "FROM PARTNER P "
-                + "LEFT JOIN INVOICE I ON I.PARTNERID = P.ID AND I.STATUS = 'PAID' "
-                + "WHERE P.TYPE = ? "
-                + "GROUP BY P.ID, P.CREATIONDATE, P.AMOUNT, P.TYPE, P.USERID";
-        PreparedStatement preparedStatement = DBConnection.getConnection().prepareStatement(query);
-        preparedStatement.setString(1, type.toString());
-        ResultSet resultSet = preparedStatement.executeQuery();
-        while (resultSet.next()) {
-            Partner partner = new Partner();
-            partner.setId(resultSet.getLong("ID"));
-            partner.setCreationDate(resultSet.getTimestamp("CREATIONDATE"));
-            partner.setAmount(resultSet.getDouble("AMOUNT"));
-            partner.setType(SubscriptionType.valueOf(resultSet.getString("TYPE")));
-            
-            User user = new User();
-            user.setId(resultSet.getLong("USERID"));
-            partner.setUserId(user);
-            
-            PartnerDto partnerDto = Helper.parse(partner);
-            partnerDto.setTotalInvoicesAmountPaid(resultSet.getDouble("TOTAL_INVOICE_AMOUNT"));
-            
-            partnersDto.add(partnerDto);
-        }
-        resultSet.close();
-        preparedStatement.close();
-        return partnersDto;
-       
-    }*/
     
     public void updatePartner(PartnerDto partnerDto) throws Exception{
         Partner partner = partnerRepository.getReferenceById(partnerDto.getId());
@@ -82,5 +51,30 @@ public class PartnerDao {
             return null;
         }
         return Helper.parse(partner);
+    }
+    
+    public List<PartnerDto> findByType(SubscriptionType type) throws Exception{
+        List<PartnerDto> partnersDto = new ArrayList<>();
+        List<Partner> partners = partnerRepository.findByType(type);
+        
+        for(Partner partner : partners) {
+            PartnerDto partnerDto = Helper.parse(partner);
+            double totalInvoicesAmountPaid = this.getTotalInvoicesAmountPaid(partnerDto);
+            partnerDto.setTotalInvoicesAmountPaid(totalInvoicesAmountPaid);
+            partnersDto.add(partnerDto);
+        }
+       
+        return partnersDto;
+    }
+    
+    private double getTotalInvoicesAmountPaid(PartnerDto partnerDto) throws Exception{
+        List<InvoiceDto> partnerInvoices = invoiceDao.findByPartnerId(partnerDto);
+        double total = 0;
+        for(InvoiceDto invoice : partnerInvoices) {
+            if(invoice.getStatus() == InvoiceStatus.PAID){
+                total += invoice.getAmount();
+            }
+        }
+        return total;
     }
 }

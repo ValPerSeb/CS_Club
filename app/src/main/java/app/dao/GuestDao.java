@@ -1,89 +1,63 @@
 
 package app.dao;
 
-import app.config.DBConnection;
+import app.dao.repositories.GuestRepository;
 import app.dto.GuestDto;
+import app.dto.PartnerDto;
+import app.dto.UserDto;
 import app.model.Guest;
-import app.model.GuestStatus;
 import app.model.Partner;
 import app.model.User;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+@Service
+@Getter
+@Setter
+@NoArgsConstructor
 
 public class GuestDao {
+    
+    @Autowired
+    public GuestRepository guestRepository;
+    
     public void createGuest(GuestDto guestDto) throws Exception {
         Guest guest = Helper.parse(guestDto);
-        String query = "INSERT INTO GUEST(STATUS,USERID,PARTNERID) VALUES (?,?,?) ";
-        PreparedStatement preparedStatement = DBConnection.getConnection().prepareStatement(query);
-        preparedStatement.setString(1, guest.getStatus().toString());
-        preparedStatement.setLong(2, guest.getUserId().getId());
-        preparedStatement.setLong(3, guest.getPartnerId().getId());
-        preparedStatement.execute();
-        preparedStatement.close();
+        guestRepository.save(guest);
     }
     
-    public List<GuestDto> getGuestsByPartnerId(long partnerId) throws Exception {
+    public List<GuestDto> findByPartnerId(PartnerDto partnerDto) throws Exception {
+        Partner partner = Helper.parse(partnerDto);
         List<GuestDto> guestsDto = new ArrayList<>();
-        String query = "SELECT ID,STATUS,USERID,PARTNERID FROM GUEST WHERE PARTNERID = ?";
-        PreparedStatement preparedStatement = DBConnection.getConnection().prepareStatement(query);
-        preparedStatement.setLong(1, partnerId);
-        ResultSet resultSet = preparedStatement.executeQuery();
-        while (resultSet.next()) {
-            Guest guest = new Guest();
-            guest.setId(resultSet.getLong("ID"));
-            guest.setStatus(GuestStatus.valueOf(resultSet.getString("STATUS")));
-            
-            User user = new User();
-            user.setId(resultSet.getLong("USERID"));
-            guest.setUserId(user);
-            
-            Partner partner = new Partner();
-            partner.setId(resultSet.getLong("PARTNERID"));
-            guest.setPartnerId(partner);
-            
-            guestsDto.add(Helper.parse(guest));
+        List<Guest> guests = guestRepository.findByPartnerId(partner);
+        for(Guest guest : guests){
+            GuestDto guestDto = Helper.parse(guest);
+            guestsDto.add(guestDto);
         }
-        resultSet.close();
-        preparedStatement.close();
         return guestsDto;
     }
     
     public void updateGuest(GuestDto guestDto) throws Exception{
-        Guest guest = Helper.parse(guestDto);
-        String query = "UPDATE GUEST SET STATUS = ? WHERE ID = ?";
-        PreparedStatement preparedStatement = DBConnection.getConnection().prepareStatement(query);
-        preparedStatement.setString(1, guest.getStatus().toString());
-        preparedStatement.setLong(2, guest.getId());
-        preparedStatement.execute();
-        preparedStatement.close();
+        
+        Guest guest = guestRepository.getReferenceById(guestDto.getId());
+        if (guest == null) {
+            throw new Exception("Invitado no encontrado.");
+        }
+        guest.setStatus(guestDto.getStatus());
+        guestRepository.save(guest);
     }
     
-    public GuestDto getGuestByUserId(long userId) throws Exception {
-        String query = "SELECT ID,USERID,PARTNERID,STATUS FROM GUEST WHERE USERID = ?";
-        PreparedStatement preparedStatement = DBConnection.getConnection().prepareStatement(query);
-        preparedStatement.setLong(1, userId);
-        ResultSet resulSet = preparedStatement.executeQuery();
-        if (resulSet.next()) {
-            Guest guest = new Guest();
-            guest.setId(resulSet.getLong("ID"));
-            guest.setStatus(GuestStatus.valueOf(resulSet.getString("STATUS")));
-            
-            User user = new User();
-            user.setId(resulSet.getLong("USERID"));
-            guest.setUserId(user);
-            
-            Partner partner = new Partner();
-            partner.setId(resulSet.getLong("PARTNERID"));
-            guest.setPartnerId(partner);
-            
-            resulSet.close();
-            preparedStatement.close();
-            return Helper.parse(guest);
+    public GuestDto findByUserId(UserDto userDto) throws Exception {
+        User user = Helper.parse(userDto);
+        Guest guest = guestRepository.findByUserId(user);
+        if(guest == null){
+            return null;
         }
-        resulSet.close();
-        preparedStatement.close();
-        return null;
+        return Helper.parse(guest);
     }
 }
