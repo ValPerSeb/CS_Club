@@ -23,7 +23,7 @@ public class UserDao {
             user.setPassword(resulSet.getString("PASSWORD"));;
             user.setRole(Role.valueOf(resulSet.getString("ROLE")));
             Person person = new Person();
-            person.setDocument(resulSet.getLong("PERSONNID"));
+            person.setId(resulSet.getLong("PERSONNID"));
             user.setPersonId(person);
             resulSet.close();
             preparedStatement.close();
@@ -69,5 +69,15 @@ public class UserDao {
         }
         preparedStatement.execute();
         preparedStatement.close();	
+    }
+    
+    public void updateUser(UserDto userDto)throws Exception{
+        User user = Helper.parse(userDto);
+        String query = "UPDATE USER SET ROLE = ? WHERE ID = ?";
+        PreparedStatement preparedStatement = DBConnection.getConnection().prepareStatement(query);
+        preparedStatement.setString(1, user.getRole().toString());
+        preparedStatement.setLong(2, user.getId());
+        preparedStatement.execute();
+        preparedStatement.close();
     }
 }

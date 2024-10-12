@@ -58,4 +58,41 @@ public class GuestDao {
         preparedStatement.execute();
         preparedStatement.close();
     }
+    
+    public void updateGuest(GuestDto guestDto) throws Exception{
+        Guest guest = Helper.parse(guestDto);
+        String query = "UPDATE GUEST SET STATUS = ? WHERE ID = ?";
+        PreparedStatement preparedStatement = DBConnection.getConnection().prepareStatement(query);
+        preparedStatement.setString(1, guest.getStatus().toString());
+        preparedStatement.setLong(2, guest.getId());
+        preparedStatement.execute();
+        preparedStatement.close();
+    }
+    
+    public GuestDto getGuestByUserId(long userId) throws Exception {
+        String query = "SELECT ID,USERID,PARTNERID,STATUS FROM GUEST WHERE USERID = ?";
+        PreparedStatement preparedStatement = DBConnection.getConnection().prepareStatement(query);
+        preparedStatement.setLong(1, userId);
+        ResultSet resulSet = preparedStatement.executeQuery();
+        if (resulSet.next()) {
+            Guest guest = new Guest();
+            guest.setId(resulSet.getLong("ID"));
+            guest.setStatus(GuestStatus.valueOf(resulSet.getString("STATUS")));
+            
+            User user = new User();
+            user.setId(resulSet.getLong("USERID"));
+            guest.setUserId(user);
+            
+            Partner partner = new Partner();
+            partner.setId(resulSet.getLong("PARTNERID"));
+            guest.setPartnerId(partner);
+            
+            resulSet.close();
+            preparedStatement.close();
+            return Helper.parse(guest);
+        }
+        resulSet.close();
+        preparedStatement.close();
+        return null;
+    }
 }
