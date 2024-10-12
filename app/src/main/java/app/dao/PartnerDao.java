@@ -9,8 +9,10 @@ import app.model.InvoiceStatus;
 import app.model.Partner;
 import app.model.SubscriptionType;
 import app.model.User;
+import jakarta.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -23,22 +25,23 @@ import org.springframework.stereotype.Service;
 @NoArgsConstructor
 
 public class PartnerDao {
-    
-    InvoiceDao invoiceDao = new InvoiceDao();
-    
     @Autowired
     public PartnerRepository partnerRepository;
+    @Autowired
+    private InvoiceDao invoiceDao;
     
     public void createPartner(PartnerDto partnerDto) throws Exception {
         Partner partner = Helper.parse(partnerDto);
         partnerRepository.save(partner);
     }
     
+    @Transactional
     public void updatePartner(PartnerDto partnerDto) throws Exception{
-        Partner partner = partnerRepository.getReferenceById(partnerDto.getId());
-        if (partner == null) {
+        Optional<Partner> optionalPartner = partnerRepository.findById(partnerDto.getId());
+        if (optionalPartner.isEmpty()) {
             throw new Exception("Socio no encontrado.");
         }
+        Partner partner = optionalPartner.get();
         partner.setAmount(partnerDto.getAmount());
         partner.setType(partnerDto.getType());
         partnerRepository.save(partner);
@@ -59,22 +62,11 @@ public class PartnerDao {
         
         for(Partner partner : partners) {
             PartnerDto partnerDto = Helper.parse(partner);
-            double totalInvoicesAmountPaid = this.getTotalInvoicesAmountPaid(partnerDto);
+            double totalInvoicesAmountPaid = invoiceDao.getTotalInvoicesAmountPaid(partnerDto);
             partnerDto.setTotalInvoicesAmountPaid(totalInvoicesAmountPaid);
             partnersDto.add(partnerDto);
         }
        
         return partnersDto;
-    }
-    
-    private double getTotalInvoicesAmountPaid(PartnerDto partnerDto) throws Exception{
-        List<InvoiceDto> partnerInvoices = invoiceDao.findByPartnerId(partnerDto);
-        double total = 0;
-        for(InvoiceDto invoice : partnerInvoices) {
-            if(invoice.getStatus() == InvoiceStatus.PAID){
-                total += invoice.getAmount();
-            }
-        }
-        return total;
     }
 }

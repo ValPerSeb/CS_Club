@@ -3,6 +3,8 @@ package app.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -30,6 +32,7 @@ public class Partner {
     private User userId;
     @Column(name="amount")
     private double amount;
+    @Enumerated(EnumType.STRING)
     @Column(name="type")
     private SubscriptionType type;
     @Column(name="creationdate")

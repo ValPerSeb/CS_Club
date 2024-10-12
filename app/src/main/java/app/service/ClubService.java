@@ -19,24 +19,34 @@ import app.model.SubscriptionType;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.stream.Collectors;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
-public class Service {
+@Service
+@Getter
+@Setter
+@NoArgsConstructor
+
+public class ClubService {
+    @Autowired
     private UserDao userDao;
+    @Autowired
     private PersonDao personDao;
+    @Autowired
     private InvoiceDao invoiceDao;
+    @Autowired
     private PartnerDao partnerDao;
+    @Autowired
     private GuestDao guestDao;
+    @Autowired
     public static UserDto user;
     public static PartnerDto partner;
     public static GuestDto guest;
     
-    public Service() {
-        this.userDao = new UserDao();
-        this.personDao = new PersonDao();
-        this.invoiceDao = new InvoiceDao();
-        this.partnerDao = new PartnerDao();
-        this.guestDao = new GuestDao();
-    }
+    
     
     public void login(UserDto userDto) throws Exception {
         UserDto validateDto = userDao.findByUserName(userDto);

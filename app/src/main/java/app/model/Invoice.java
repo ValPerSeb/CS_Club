@@ -3,6 +3,8 @@ package app.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -35,6 +37,7 @@ public class Invoice {
     private Timestamp creationDate;
     @Column(name="amount")
     private double amount;
+    @Enumerated(EnumType.STRING)
     @Column(name="status")
     private InvoiceStatus status;
 }

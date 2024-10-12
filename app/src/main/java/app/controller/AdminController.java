@@ -7,15 +7,26 @@ import app.dto.PersonDto;
 import app.dto.UserDto;
 import app.model.Role;
 import app.model.SubscriptionType;
-import app.service.Service;
+import app.service.ClubService;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Comparator;
 import java.util.List;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+
+@Controller
+@Getter
+@Setter
+@NoArgsConstructor
 
 public class AdminController implements ControllerInterface{
-    private Service service;
+    @Autowired
+    private ClubService service;
     private static final String MENU = "Ingrese la opción deseada: \n 1. Crear nuevo socio. "
             + "\n 2. Ver historial de facturas Club. "
             + "\n 3. Ver historial de facturas Socio. "
@@ -23,11 +34,6 @@ public class AdminController implements ControllerInterface{
             + "\n 5. Ejecutar promoción a VIP. "
             + "\n 6. Cerrar Sesión.\n";
 
-    public AdminController(){
-        this.service = new Service();
-    }
-  
-    
     @Override
     public void session() throws Exception {
         boolean session = true;

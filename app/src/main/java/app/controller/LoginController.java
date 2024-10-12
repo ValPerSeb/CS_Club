@@ -3,20 +3,27 @@ package app.controller;
 
 import app.dto.UserDto;
 import app.model.Role;
-import app.service.Service;
+import app.service.ClubService;
 import java.util.HashMap;
 import java.util.Map;
+import lombok.Getter;
+import lombok.Setter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+
+@Controller
+@Getter
+@Setter
+
 
 public class LoginController implements ControllerInterface{
-    private Service service;
+    @Autowired
+    private ClubService service;
     private static final String MENU= "*** CS Club *** \n Ingrese la opción deseada: \n 1. Iniciar Sesión. \n 2. Salir. \n";
     private Map<Role,ControllerInterface> roles;
 
-    public LoginController() {
-        this.service = new Service();
-        ControllerInterface adminController = new AdminController();
-        ControllerInterface partnerController = new PartnerController();
-        ControllerInterface guestController = new GuestController();
+    public LoginController(ControllerInterface adminController,PartnerController partnerController,GuestController guestController) {
+        this.service = new ClubService();
         this.roles= new HashMap<Role,ControllerInterface>();
         roles.put(Role.ADMIN, adminController);
         roles.put(Role.PARTNER, partnerController);
@@ -49,7 +56,7 @@ public class LoginController implements ControllerInterface{
                     return true;
             }
             case "2": {
-                    System.out.println("Saliendo del programa...");;
+                    System.out.println("Saliendo del programa...");
                     return false;
             }
             default: {

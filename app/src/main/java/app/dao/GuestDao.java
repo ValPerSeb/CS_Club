@@ -8,11 +8,14 @@ import app.dto.UserDto;
 import app.model.Guest;
 import app.model.Partner;
 import app.model.User;
+import jakarta.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -42,12 +45,16 @@ public class GuestDao {
         return guestsDto;
     }
     
-    public void updateGuest(GuestDto guestDto) throws Exception{
-        
-        Guest guest = guestRepository.getReferenceById(guestDto.getId());
-        if (guest == null) {
+    @Transactional
+    public void updateGuest(GuestDto guestDto) throws Exception {
+        Optional<Guest> optionalGuest = guestRepository.findById(guestDto.getId());
+
+        if (optionalGuest.isEmpty()) {
             throw new Exception("Invitado no encontrado.");
         }
+
+        Guest guest = optionalGuest.get();
+
         guest.setStatus(guestDto.getStatus());
         guestRepository.save(guest);
     }

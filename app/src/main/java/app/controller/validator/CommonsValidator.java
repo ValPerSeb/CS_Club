@@ -2,6 +2,11 @@
 package app.controller.validator;
 
 import java.sql.Date;
+import lombok.NoArgsConstructor;
+import org.springframework.stereotype.Component;
+
+@Component
+@NoArgsConstructor
 
 public class CommonsValidator {
     public String isValidString(String element, String value) throws Exception {

@@ -8,10 +8,13 @@ import app.dto.InvoiceDto;
 import app.dto.PartnerDto;
 import app.model.Invoice;
 import app.model.InvoiceDetail;
+import app.model.InvoiceStatus;
 import app.model.Partner;
 import app.model.Role;
+import jakarta.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -72,14 +75,28 @@ public class InvoiceDao {
         invoiceDetailRepository.save(invoiceDetail);
     }
     
+    @Transactional
     public void updateInvoice(InvoiceDto invoiceDto) throws Exception{
         
-        Invoice invoice = invoiceRepository.getReferenceById(invoiceDto.getId());
-        if (invoice == null) {
+        Optional<Invoice> optionalInvoice  = invoiceRepository.findById(invoiceDto.getId());
+        if (optionalInvoice.isEmpty()) {
             throw new Exception("Factura no encontrada.");
         }
+        Invoice invoice = optionalInvoice.get();
         invoice.setAmount(invoiceDto.getAmount());
         invoice.setStatus(invoiceDto.getStatus());
         invoiceRepository.save(invoice);
+    }
+    
+    
+    public double getTotalInvoicesAmountPaid(PartnerDto partnerDto) throws Exception{
+        List<InvoiceDto> partnerInvoices = this.findByPartnerId(partnerDto);
+        double total = 0;
+        for(InvoiceDto invoice : partnerInvoices) {
+            if(invoice.getStatus() == InvoiceStatus.PAID){
+                total += invoice.getAmount();
+            }
+        }
+        return total;
     }
 }
