@@ -82,6 +82,7 @@ public class PartnerDao {
             
             User user = new User();
             user.setId(resulSet.getLong("USERID"));
+            partner.setUserId(user);
             resulSet.close();
             preparedStatement.close();
             return Helper.parse(partner);

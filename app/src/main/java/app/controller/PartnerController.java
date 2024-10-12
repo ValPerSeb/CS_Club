@@ -11,14 +11,25 @@ import app.model.GuestStatus;
 import app.model.InvoiceStatus;
 import app.model.Role;
 import app.model.SubscriptionType;
-import app.service.Service;
-import static app.service.Service.user;
+import app.service.ClubService;
+import static app.service.ClubService.user;
 import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.List;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+
+@Controller
+@Getter
+@Setter
+@NoArgsConstructor
 
 public class PartnerController implements ControllerInterface{
-    private Service service;
+    @Autowired
+    private ClubService service;
     private static final String MENU = "Ingrese la opción deseada: \n 1. Crear Invitado. "
             + "\n 2. Activar Invitado. "
             + "\n 3. Desactivar Invitado. "
@@ -29,11 +40,6 @@ public class PartnerController implements ControllerInterface{
             + "\n 8. Historial de Facturas Socio."
             + "\n 9. Cerrar Sesión. \n";
 
-    public PartnerController(){
-        this.service = new Service();
-    }
-  
-    
     @Override
     public void session() throws Exception {
         boolean session = true;
@@ -162,11 +168,11 @@ public class PartnerController implements ControllerInterface{
                 + "- VIP: " + maxAmountVIP + "\n"
                 + "- REGULARES: " + maxAmountRegular + "\n");
         }
-        
+       
         newAmount = this.service.payPendingInvoices(newAmount);
         
         currentPartner.setAmount(newAmount);
-        
+      
         this.service.updatePartner(currentPartner);
         System.out.println("Fondos actualizados correctamente.\n");
     }
@@ -183,14 +189,9 @@ public class PartnerController implements ControllerInterface{
         if(partnerInvoices.size() > 0){
             throw new Exception("No es posible cancelar suscripción, tiene facturas pendientes por pagar \n");
         }
-        System.out.println("Eliminando facturas del socio...");
-        this.service.deleteInvoicesByCurrentPartnerId();
-        
-        System.out.println("Eliminando Invitados del socio...");
-        this.service.deleteGuestsByCurrentPartnerId();
         
         System.out.println("Eliminando datos del socio... \n");
-        this.service.deleteCurrentPartner();
+        this.service.deleteCurrentUser();
         this.service.logout();
     }
     

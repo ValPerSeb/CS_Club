@@ -8,21 +8,27 @@ import app.dto.PartnerDto;
 import app.model.GuestStatus;
 import app.model.InvoiceStatus;
 import app.model.SubscriptionType;
-import app.service.Service;
-import static app.service.Service.user;
+import app.service.ClubService;
+import static app.service.ClubService.user;
 import java.sql.Timestamp;
 import java.util.Calendar;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+
+@Controller
+@Getter
+@Setter
+@NoArgsConstructor
 
 public class GuestController implements ControllerInterface{
-    private Service service;
+    @Autowired
+    private ClubService service;
     private static final String MENU = "Ingrese la opción deseada: \n 1. Hacer consumo. "
             + "\n 2. Solicitud ascenso a Socio. "
-            + "\n 3. Cerrar sesión. \n";
-
-    public GuestController(){
-        this.service = new Service();
-    }
-  
+            + "\n 3. Cerrar sesión. \n";  
     
     @Override
     public void session() throws Exception {
